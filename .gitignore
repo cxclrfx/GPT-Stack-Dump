@@ -1,0 +1,14 @@
+# Local histories, credentials, and working files
+*.har
+*.jsonl
+*.json
+*.zip
+*.log
+.env
+.env.*
+*token*
+*cookie*
+exports/
+checkpoints/
+node_modules/
+work/
