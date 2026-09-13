@@ -65,7 +65,7 @@ No conversation needs to be manually opened or scrolled to the top.
 
 ## Earlier prototype report
 
-Preparation notes report an earlier prototype run against **106 conversations**. These observations describe that earlier run, not a live validation of version 1.0.1.
+An earlier prototype run processed **106 conversations**. These observations describe that earlier run, not a live validation of version 1.0.1.
 
 Observed behavior:
 

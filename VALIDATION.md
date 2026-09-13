@@ -15,7 +15,7 @@ node --test tests/exporter.test.cjs
 
 The tests extract the function definitions from the shipped source into an isolated context with synthetic fetch, database, timer, and download adapters. They do not authenticate, read an account, or make network requests. These are project regression tests, not independent closure or a completeness proof.
 
-## Changes from the prepared 1.0.0 source
+## Changes since version 1.0.0
 
 - Preserve the server's Retry-After minimum even when jitter decreases the fallback delay.
 - Reject missing or repeated previous-page cursors when more history is indicated; require an explicit boolean completion flag.
@@ -27,8 +27,6 @@ The tests extract the function definitions from the shipped source into an isola
 - Propagate output stream errors instead of leaving export pending.
 - Avoid copying HTTP response bodies into failure records.
 - Require the ChatGPT origin and prevent duplicate runs in the same tab; close the database and release the guard on exit.
-
-The existing README supplied with the project is the source of both the documentation and embedded exporter. Its original file was not modified. Source-file SHA-256: `5b540c0e1d07de73b5174f13a42365b080074817a51549f69dafdf2a9e4d9dbb`.
 
 ## Limits
 
