@@ -1,8 +1,10 @@
 # GPT Stack Dump — Complete Usage Guide
 
-This file contains the full step-by-step instructions for using **GPT Stack Dump**.
+This file contains the full step-by-step instructions for using **GPT Stack Dump 1.0.1**.
 
-The main `README.md` explains what the project does.  
+These instructions are aligned with the shipped source. Live account export and actual browser checkpoint/download behavior remain **NOT_RUN** for this release; see [VALIDATION.md](VALIDATION.md).
+
+The main [README.md](README.md) explains what the project does. Use is governed by the [source-available LICENSE](LICENSE).
 This file explains **exactly how to run it, what to expect, where the data is stored, and what to do if something goes wrong**.
 
 ---
@@ -244,7 +246,7 @@ The fallback cooldown sequence can grow approximately like:
 
 Small random variation may be added to the waiting time.
 
-If the server provides a `Retry-After` value, the exporter should respect it.
+For HTTP 429, the exporter waits at least the parsed `Retry-After` duration when present, including after jitter. Persistent 429 and selected server errors retry without a fixed attempt limit. Reload or close the tab to stop.
 
 After waiting, GPT Stack Dump retries the useful request it already needed instead of running a separate high-frequency probe.
 
@@ -274,9 +276,9 @@ Large histories may export very quickly at first and then slow down later.
 
 This is normally caused by server-side rate limiting rather than local processing speed.
 
-A real prototype test processed 106 conversations.
+Earlier preparation notes report a prototype download pass reaching 106 conversations. Its final packaging step failed with a string-size error. This historical report is not a live validation of version 1.0.1.
 
-The early part completed quickly, while later conversations became slower after the server began returning repeated `429` responses.
+According to those notes, the early part completed quickly, while later conversations became slower after repeated `429` responses.
 
 The exact threshold is not fixed.
 
@@ -327,23 +329,17 @@ The checkpoint allows the exporter to resume more safely.
 
 # 17. Where checkpoints are stored
 
-Checkpoints are stored locally by the browser in IndexedDB for the ChatGPT site.
+Checkpoints are stored in IndexedDB for the ChatGPT origin, in the same browser profile.
 
-They are not the final export file.
-
-They are temporary local working state used to resume the process.
-
-The database name used by the current release is documented in the exporter source.
-
-For the initial public release it may appear similar to:
+Version 1.0.1 uses this exact database name:
 
 ```text
-chatgpt-history-exporter-v1
+chatgpt-history-exporter-v1.0.1
 ```
 
-or the current GPT Stack Dump database name used by that release.
+The object store is `conversations`. Checkpoints are working data, not the final downloaded file. This release does not reuse or delete older-version databases.
 
-Always check the current `exporter.js` if you need the exact database identifier.
+Checkpoints are not encrypted by the script or isolated per account. Other code running on the ChatGPT origin can access them. Use a separate browser profile per account.
 
 ---
 
@@ -456,48 +452,26 @@ JSONL avoids requiring the entire history to become one giant string at once.
 
 # 24. Example file name
 
-The file name may look similar to:
+Version 1.0.1 names the download using the export timestamp:
 
 ```text
-chatgpt_history_2026-09-13T00-00-00.jsonl
+chatgpt_history_YYYY-MM-DDTHH-MM-SS-sssZ.jsonl
 ```
-
-or:
-
-```text
-GPT_STACK_DUMP_2026-09-13T00-00-00.jsonl
-```
-
-The exact name can change between releases.
 
 ---
 
 # 25. What is inside the JSONL file
 
-Typically the first record is a manifest describing the export.
-
-Later records contain conversations.
-
-A simplified example:
+The first line is a manifest. Each later line contains one exported conversation. These are synthetic, abbreviated examples with the current field names:
 
 ```json
-{"record_type":"manifest","format":"gpt-stack-dump-jsonl","version":"1.0"}
-{"record_type":"conversation","conversation_id":"...","conversation":{...}}
-{"record_type":"conversation","conversation_id":"...","conversation":{...}}
+{"record_type":"manifest","format":"chatgpt-history-export-jsonl","version":"1.0.1","indexed_conversations":1,"failures":[],"completed_or_reused":1,"checkpoint_reused":0,"projects_detected":0}
+{"record_type":"conversation","index":{"id":"example"},"conversation":{"conversation_id":"example","messages":[]}}
 ```
 
-The raw conversation structure may include:
+The real manifest also includes exporter name, export time, and rate-limit strategy. The conversation record includes index metadata and the merged conversation, with exporter metadata added.
 
-- conversation ID;
-- title;
-- timestamps;
-- messages;
-- message metadata;
-- model metadata;
-- conversation pagination data;
-- other fields returned by the current ChatGPT web interface.
-
-Because GPT Stack Dump uses undocumented internal endpoints, the exact structure can change.
+The raw data can contain titles, timestamps, messages, model metadata, and file references. Its structure depends on undocumented web endpoints. Binary attachments are not downloaded separately.
 
 ---
 
@@ -600,28 +574,21 @@ Already completed conversations should remain checkpointed.
 
 # 31. If you run the exporter twice
 
-The checkpoint-enabled version should recognize previously completed conversations.
+Version 1.0.1 reuses a checkpoint only when its conversation ID and exporter version match and both recognized update timestamps are equal. Different or unknown timestamps trigger a fresh fetch.
 
-Depending on the release, it may:
+If a refresh fails, the older checkpoint stays in the database but is excluded from that run's export. The failure is listed in the manifest.
 
-- reuse unchanged conversations;
-- refresh conversations whose update time changed;
-- fetch only missing conversations.
-
-Always check the Console summary at startup.
+Do not run simultaneous exports across tabs in the same profile. The duplicate-run guard protects only the current tab.
 
 ---
 
 # 32. If new conversations were created after the previous export
 
-Run GPT Stack Dump again.
+Run GPT Stack Dump again in the same browser profile and account.
 
-A good incremental exporter should:
+It rebuilds the index, downloads newly discovered conversations, and reuses checkpoints only under the rules in section 31. New or changed conversations are fetched and a new JSONL download is created.
 
-- discover newly created conversations;
-- reuse completed unchanged checkpoints;
-- download new or changed conversations;
-- produce a fresh final export.
+Indexing is not an atomic snapshot. Avoid editing conversations while exporting.
 
 ---
 
@@ -637,25 +604,22 @@ Run the exporter again to refresh conversations that changed after the earlier c
 
 # 34. How to remove checkpoints and start completely fresh
 
-Only do this when you intentionally want to erase the local GPT Stack Dump checkpoint database.
+Only do this after verifying your downloaded archive, or when you deliberately want to discard saved work.
 
-The exact database name depends on the release.
-
-For a release using:
-
-```text
-chatgpt-history-exporter-v1
-```
-
-you can run:
+1. Stop the exporter by reloading its tab. Stop any other exporter tabs in the same profile.
+2. In the ChatGPT Console, run:
 
 ```javascript
-indexedDB.deleteDatabase("chatgpt-history-exporter-v1");
+const checkpointDeletion = indexedDB.deleteDatabase("chatgpt-history-exporter-v1.0.1");
+checkpointDeletion.onsuccess = () => console.log("Checkpoint database deleted.");
+checkpointDeletion.onerror = () => console.error("Checkpoint deletion failed:", checkpointDeletion.error);
+checkpointDeletion.onblocked = () => console.warn("Close other ChatGPT tabs holding this database open.");
 ```
 
-Then reload ChatGPT before starting a completely new export.
+3. Wait for the success message. A returned request object alone does not prove deletion.
+4. Reload ChatGPT before starting a fresh export.
 
-Do **not** delete the database during a running export unless you deliberately want to discard the saved checkpoint state.
+This deletes only the named version 1.0.1 checkpoint database. Older-version databases and downloaded files are separate. Do not delete storage during a running export.
 
 ---
 
@@ -756,7 +720,9 @@ A Projects request may return:
 
 or another response that differs from the current exporter expectations.
 
-The exporter should avoid treating a Projects-only failure as failure of all normal history export.
+A failed Projects discovery request warns and continues with the projects discovered so far. A per-project indexing failure also warns and continues; those requests retry selected server errors without a fixed limit. Unexpected response shapes or repeated discovery cursors can stop indexing.
+
+Projects warnings are not comprehensively recorded in the manifest. A completed download does not prove Projects coverage.
 
 Always check the Console summary.
 
@@ -770,7 +736,7 @@ Do not assume that exporting conversation JSON automatically downloads every bin
 
 Attachment downloading is a separate feature and can depend on additional endpoints and access rules.
 
-The public release documentation should explicitly state which attachment types are supported.
+Version 1.0.1 does not separately download binary attachments of any type. References in conversation JSON are not copies of the referenced files.
 
 ---
 
@@ -784,7 +750,7 @@ GPT Stack Dump reduces risk by:
 - checkpointing completed work;
 - serializing output per conversation instead of stringifying the whole history at once.
 
-Nevertheless, extremely large histories may still require substantial memory and disk space.
+The script assembles the final Blob in browser memory. It is not constant-memory streaming to disk, and a single huge conversation can still exceed string limits. Allow substantial memory and disk space.
 
 ---
 
@@ -997,7 +963,9 @@ Useful checks include:
 - archived conversation coverage;
 - Projects coverage.
 
-A separate integrity-verification tool can perform these checks automatically.
+Inspect the manifest fields `indexed_conversations`, `completed_or_reused`, and `failures`, and count the conversation records. An empty failure list does not prove full account, Projects, alternate-branch, or attachment coverage. Missing checkpoints can also reduce output; compare the actual records with the expected archive.
+
+If the console reports missing pagination evidence, a repeated cursor, conflicting messages, a conversation identity mismatch, or an unrecognized list shape, the current response did not meet the exporter's checks. Preserve checkpoints and report a sanitized error; do not remove the checks to force completion.
 
 ---
 
@@ -1078,7 +1046,7 @@ preserves completed work
 respects server limits
 waits when necessary
 continues safely
-and produces a complete local result
+and produces a local result whose coverage you verify
 ```
 
 ---
@@ -1091,7 +1059,7 @@ If you open a GitHub Issue, include:
 - operating system;
 - GPT Stack Dump version;
 - approximate conversation count;
-- the last few Console status lines;
+- the last few Console status lines, after removing conversation titles, IDs, project names, and other private details;
 - HTTP status code if relevant (`429`, `500`, etc.);
 - whether the problem affects normal chats, archived chats, Projects, or output creation.
 

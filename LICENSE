@@ -1,0 +1,96 @@
+GPT Stack Dump Source-Available License
+Version 1.0 — 2026-09-13
+
+Copyright (c) 2026 cxclrfx. All rights reserved except as expressly granted below.
+
+1. Scope and definitions
+
+"Licensor" means the copyright holder identified above.
+"Software" means GPT Stack Dump source code, tests, and accompanying
+documentation made available by the Licensor under this license, including
+copies and modifications of those materials.
+
+"Non-commercial" means not intended for or directed toward commercial
+advantage, monetary compensation, or the operation of a business or a service
+for customers. An organization's nonprofit status alone does not determine
+whether a particular use is non-commercial.
+
+2. Permitted use
+
+Subject to this license, the Licensor grants you a worldwide, royalty-free,
+non-exclusive license to access, inspect, copy, run, and modify lawfully
+obtained copies of the Software solely for:
+(a) personal, non-commercial use, including backing up your own account;
+(b) non-commercial education, teaching, and study; or
+(c) non-commercial evaluation and testing.
+
+You may share unmodified or modified copies without charge solely for the
+purposes above, provided you include this complete license and retain all
+copyright and attribution notices. Mark modified copies clearly as modified,
+with a description of your changes. Recipients receive their permitted rights
+directly under this license; you may not relicense or sublicense the Software
+under broader terms.
+
+3. Separate commercial license required
+
+You must obtain a separate written commercial license from the Licensor
+BEFORE any of the following uses of the Software or a modified version:
+(a) commercial deployment, including internal business or production use;
+(b) sale, resale, rental, paid distribution, or sublicensing;
+(c) paid integration, consulting, or implementation using the Software;
+(d) operating or providing the Software as a hosted or managed service,
+    including software-as-a-service and export or backup services for others;
+(e) embedding, bundling, or incorporating the Software or a substantial
+    portion of it into another product, application, platform, or service; or
+(f) any other use for commercial advantage or monetary compensation.
+
+Items (d) and (e) require that separate license even if end users are not
+charged. Local modifications solely for the permitted purposes in section 2
+are allowed; they do not authorize embedding in another product or service.
+Using the Software free of charge does not make business use non-commercial.
+A commercial license is effective only when agreed in writing by the Licensor.
+
+For commercial licensing, contact the repository owner, cxclrfx, through the
+contact information they make available at https://github.com/cxclrfx.
+A request or an unanswered inquiry does not grant commercial permission.
+
+4. Data, confidentiality, and third-party rights
+
+This license covers the Software, not your conversations, exported data,
+credentials, or other user content. It gives the Licensor no rights in your
+data. Output is not subject to this license merely because the Software
+generated it, unless it contains copies of the Software. Commercial operation
+of the Software still requires the separate license described in section 3.
+
+This license does not authorize access to another person's account, disclosure
+of confidential materials, or distribution of a private repository contrary
+to applicable confidentiality obligations. Repository access or visibility
+does not expand these permissions. No rights to third-party services,
+trademarks, or materials are granted. Independently licensed third-party
+materials, if present, remain subject to their own licenses.
+
+5. Reserved rights and termination
+
+All rights not expressly granted are reserved. This is a source-available
+license with use restrictions, not an open-source license.
+
+Your permissions terminate automatically if you violate this license.
+Upon termination, stop using and distributing the Software and remove copies
+under your control, except copies you must retain by law. Such retained copies
+may not be used. Reinstatement requires the Licensor's written permission.
+Sections 3 through 6 survive termination where applicable.
+
+6. No warranty; limitation of liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
+"AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+TITLE, AND NON-INFRINGEMENT.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR IS NOT LIABLE
+FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR
+OTHERWISE, ARISING FROM OR RELATED TO THE SOFTWARE OR ITS USE, INCLUDING
+DATA LOSS, INCOMPLETE EXPORTS, SERVICE INTERRUPTIONS, OR LOST PROFITS.
+
+Nothing in this license excludes liability or restricts rights that cannot
+lawfully be excluded or restricted.

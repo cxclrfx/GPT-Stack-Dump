@@ -12,6 +12,8 @@ The exporter automatically indexes conversations, walks paginated message histor
 
 > **Unofficial project.** This tool is not affiliated with or endorsed by OpenAI. It relies on undocumented ChatGPT web endpoints that may change at any time. Use it only with your own account and only where permitted.
 
+**Documentation:** [Complete usage and troubleshooting guide](INSTRUCTIONS.md) · [License](LICENSE) · [Validation](VALIDATION.md)
+
 ---
 
 ## Why this exists
@@ -49,7 +51,7 @@ No conversation needs to be manually opened or scrolled to the top.
 - **No manual scrolling** — the browser UI does not need to preload the full chat.
 - **Checkpoint after every completed conversation** using IndexedDB.
 - **Resume support** — rerunning the same script reuses completed checkpoints.
-- **Changed chats are refreshed** when their indexed `update_time` is newer than the saved checkpoint.
+- **Changed chats are refreshed** when their recognized indexed `update_time` differs from the saved checkpoint; unknown timestamps also trigger a fresh fetch.
 - **Single-request mode** — conversations are never downloaded in parallel.
 - **Rate-aware circuit breaker** — HTTP `429` causes a real cooldown rather than continuous hammering.
 - **`Retry-After` support** — when the server supplies a reset time, the exporter respects it.
@@ -178,13 +180,13 @@ If the tab is closed, the browser crashes, the network becomes unavailable, or t
 
 Completed checkpoints from this version are reused only when their conversation ID and recognized update timestamp match the current index. Unknown or changed timestamps trigger a fresh fetch. Version 1.0.1 uses a new database so older potentially incomplete checkpoints are not trusted; the old database is not deleted.
 
-To deliberately remove the local checkpoint database, run this in the ChatGPT console:
+To deliberately remove the local checkpoint database, first stop the exporter by reloading its tab and stop any other exporter tabs. Then run this in the ChatGPT console:
 
 ```javascript
 indexedDB.deleteDatabase("chatgpt-history-exporter-v1.0.1");
 ```
 
-Then reload the page before starting a completely fresh export.
+Wait for deletion to succeed, then reload the page before starting a completely fresh export. See [checkpoint cleanup instructions](INSTRUCTIONS.md#34-how-to-remove-checkpoints-and-start-completely-fresh) for success, error, and blocked-deletion handling.
 
 ---
 
@@ -237,6 +239,8 @@ For an official account archive, use OpenAI's official data-export mechanism.
 ---
 
 ## How to run
+
+See [INSTRUCTIONS.md](INSTRUCTIONS.md) for the complete guide, checkpoint cleanup, and troubleshooting.
 
 1. Open `https://chatgpt.com/` in Chrome or Edge.
 2. Sign in to the account whose history you want to export.
@@ -378,6 +382,8 @@ The rate-control logic is intentionally conservative after a server `429`.
 
 ```text
 README.md
+INSTRUCTIONS.md
+LICENSE
 exporter.js
 VALIDATION.md
 tests/exporter.test.cjs
@@ -388,11 +394,15 @@ tests/exporter.test.cjs
 
 ## License
 
-Copyright © 2026. All rights reserved.
+Copyright © 2026 cxclrfx.
 
-Public visibility of this repository does not by itself grant permission to copy, modify, redistribute, sublicense, or sell the source code.
+GPT Stack Dump is distributed under the [GPT Stack Dump Source-Available License, version 1.0](LICENSE).
 
-A separate license can be added later if broader reuse is desired.
+Personal non-commercial use, non-commercial education, and non-commercial evaluation/testing are permitted. Copies and modifications may be shared without charge for those purposes under the license's notice and confidentiality conditions.
+
+**A separate written commercial license is required before commercial deployment (including internal business use), resale, paid integration, managed-service use, or embedding in another product or service.** Managed-service use and embedding require that license even when end users are not charged.
+
+This is source-available software with use restrictions. It is **not open source**. The license covers the software and documentation; it does not claim ownership of your conversations or exports. Contact [cxclrfx](https://github.com/cxclrfx) using the contact information made available on that profile for commercial licensing. The [LICENSE](LICENSE) contains the controlling terms.
 
 ---
 
